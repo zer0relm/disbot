@@ -4,7 +4,7 @@ import random
 
 class sqlBot():
     def __init__(self):
-        keys = dotenv.dotenv_values("db.env")
+        keys = dotenv.dotenv_values("test_db.env")
         self.mydb = mysql.connector.connect(
             host=keys["HOST"],
             user=keys["USER"],
@@ -52,5 +52,7 @@ class sqlBot():
         self.my_cursor.execute("SELECT * FROM ticks order by id desc")
         return self.my_cursor.fetchone()
 
-    def getTick(self, tick):
-        pass
+    def getTicks(self):
+        self.my_cursor.execute("SELECT * FROM ticks")
+        ticks = self.my_cursor.fetchall()
+        return ticks
