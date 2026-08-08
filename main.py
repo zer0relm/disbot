@@ -119,4 +119,4 @@ async def remove_keyword(interaction: discord.Interaction, keyword: str, user: d
 #     await interaction.response.send_message("recieved emoji '{}'".format(emoji))
 
 
-client.run(dotenv.dotenv_values("test_discord.env")['DISCORD_TOKEN'])
+client.run(dotenv.dotenv_values("prod_discord.env")['DISCORD_TOKEN'])
