@@ -1,21 +1,21 @@
-import mysql.connector
+import pymysql
 import dotenv
 import random
 
 class sqlBot():
     def __init__(self):
         keys = dotenv.dotenv_values("test_db.env")
-        self.mydb = mysql.connector.connect(
+        self.mydb = pymysql.connect(
             host=keys["HOST"],
             user=keys["USER"],
             password=keys["PASSWORD"],
             database=keys["DATABASE"]
         )
-        self.my_cursor = self.mydb.cursor(buffered=True)
-        self.debug = False
+        self.my_cursor = self.mydb.cursor()
+        self.debug = True
         try:
             self.my_cursor.execute("SELECT * FROM quote_test")
-        except mysql.connector.Error as error:
+        except pymysql.Error as error:
             print(error)
 
     def getRandomQuote(self):
@@ -27,6 +27,13 @@ class sqlBot():
             print(random_quote_id)
         self.my_cursor.execute(f"SELECT * FROM quote WHERE quote_id = {random_quote_id}")
         quote = self.my_cursor.fetchone()
+        return quote
+
+    def getSpecificQuote(self, quote_id):
+        self.my_cursor.execute(f"SELECT * FROM quote WHERE quote_id = {quote_id}")
+        quote = self.my_cursor.fetchone()
+        if self.debug:
+            print(quote)
         return quote
 
     def addQuote(self, quote, user):
@@ -59,3 +66,17 @@ class sqlBot():
         self.my_cursor.execute("SELECT count(*) FROM keywords")
         ticks_count = self.my_cursor.fetchone()
         return ticks
+
+    def removeKeyword(self, keyword: str):
+        sql = "DELETE FROM keywords WHERE word = %s"
+        values = keyword
+        self.my_cursor.execute(sql, values)
+        self.mydb.commit()
+        return "SUCCESS"
+
+    def removeUserKeyword(self, keyword: str, user):
+        sql = "DELETE FROM keywords WHERE word = %s AND user_id = %s"
+        values = (keyword, user)
+        self.my_cursor.execute(sql, values)
+        self.mydb.commit()
+        return "SUCCESS"
