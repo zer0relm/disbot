@@ -38,6 +38,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 client = MyClient(intents=intents)
 shocked_emoji = client.get_emoji(1439750626656522390)
+keyword_list = sql_connector.getKeywords()
 
 @client.event
 async def on_ready():
@@ -46,16 +47,29 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    global keyword_list
     if message.author == client.user:
         return
+    for keyword in keyword_list:
+        word = keyword[1].lower()
+        emoji = keyword[2]
+        user = keyword[3]
 
-    if "sword" in message.content.lower():
-        await message.add_reaction("<:emoji_1:1439750626656522390>")
-    elif "swords" in message.content.lower():
-        await message.add_reaction()
-        #sql_connector.getTicks()
-    elif "lizard" in message.content.lower():
-        await message.add_reaction('\N{LIZARD}')
+        if word in message.content.lower():
+            if user != None:
+                print(user)
+                if user == str(message.author):
+                    await message.add_reaction(emoji)
+            else:
+                await message.add_reaction(emoji)
+
+    # if "sword" in message.content.lower():
+    #     await message.add_reaction("<:gremlin_w_parent:1424791312409952257>")
+    # elif "swords" in message.content.lower():
+    #     await message.add_reaction()
+    #     #sql_connector.getTicks()
+    # elif "lizard" in message.content.lower():
+    #     await message.add_reaction('\N{LIZARD}')
 
 @client.tree.command(name="quote", description="returns a random quote")
 async def quote(interaction: discord.Interaction):
@@ -70,21 +84,26 @@ async def add_quote(interaction: discord.Interaction, quote: str, user: str = No
     quote_return = sql_connector.addQuote(quote, user)
     await interaction.response.send_message("Quote #{}: '{}' - {}".format(quote_return[0], quote_return[1], quote_return[3]))
 
-# @client.tree.command(name="register_mental_illness", description="Add tick to list")
-# async def add_tick(interaction: discord.Interaction, tick: str, user: discord.User = None):
-#     if user is None:
-#         response = sql_connector.addTick(tick)
-#         await interaction.response.send_message(f"Tick #{response[0]}: {response[1]} for everyone", ephemeral=True)
-#     else:
-#         response = sql_connector.addUserTick(tick, str(user.name))
-#         await interaction.response.send_message(f"Tick #{response[0]}: {response[1]} for {response[2]}", ephemeral=True)
-#
-# @client.tree.command(name="get_tick")
-# async def get_tick(interaction: discord.Interaction):
-#     ticks = sql_connector.getTicks()
-#     for word in ticks:
-#         print(word)
-#     await interaction.response.send_message("Successfully fetched ticks", ephemeral=True)
+@client.tree.command(name="add_keyword", description="Add Keyword and emoji to list")
+async def add_keyword(interaction: discord.Interaction, keyword: str, emoji: str, user: discord.User = None):
+    global keyword_list
+    print(str(emoji))
+    if user is None:
+        response = sql_connector.addKeyword(keyword, emoji)
+        keyword_list = sql_connector.getKeywords()
+        await interaction.response.send_message(f"Keyword #{response[0]}: {response[1]} for everyone", ephemeral=True)
+    else:
+        response = sql_connector.addUserKeyword(keyword, emoji, str(user))
+        keyword_list = sql_connector.getKeywords()
+        await interaction.response.send_message(f"Keyword #{response[0]}: {response[1]} for {response[2]}", ephemeral=True)
+
+
+@client.tree.command(name="test_emojis", description="Test emojis on list")
+async def test_emoji(interaction: discord.Interaction, emoji: str):
+    print(emoji)
+    print(str(emoji))
+    print(emoji.startswith("<:"))
+    await interaction.response.send_message("recieved emoji '{}'".format(emoji))
 
 
 client.run(dotenv.dotenv_values("test_discord.env")['DISCORD_TOKEN'])

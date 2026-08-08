@@ -19,40 +19,43 @@ class sqlBot():
             print(error)
 
     def getRandomQuote(self):
-        self.my_cursor.execute("SELECT count(*) FROM quote_test")
+        self.my_cursor.execute("SELECT count(*) FROM quote")
         quote_count = self.my_cursor.fetchone()
         random_quote_id = random.randint(1, quote_count[0])
         if self.debug:
             print(quote_count)
             print(random_quote_id)
-        self.my_cursor.execute(f"SELECT * FROM quote_test WHERE quote_id = {random_quote_id}")
+        self.my_cursor.execute(f"SELECT * FROM quote WHERE quote_id = {random_quote_id}")
         quote = self.my_cursor.fetchone()
         return quote
 
     def addQuote(self, quote, user):
-        sql = "INSERT INTO quote_test (quote_text, quoted_dttm, user) VALUES (%s, NOW(), %s)"
+        sql = "INSERT INTO quote (quote_text, quoted_dttm, user) VALUES (%s, NOW(), %s)"
         values = (quote, user)
         self.my_cursor.execute(sql, values)
         self.mydb.commit()
-        self.my_cursor.execute("SELECT * FROM quote_test order by quote_id desc")
+        self.my_cursor.execute("SELECT * FROM quote order by quote_id desc")
         return self.my_cursor.fetchone()
 
-    def addUserTick(self, tick, user):
-        sql = "INSERT INTO ticks (keyword, user) VALUES (%s, %s)"
-        values = (tick, user)
+    def addUserKeyword(self, keyword, emoji, user):
+        sql = "INSERT INTO keywords (word, emoji, user) VALUES (%s, %s, %s)"
+        values = (keyword, emoji, user)
         self.my_cursor.execute(sql, values)
         self.mydb.commit()
-        self.my_cursor.execute("SELECT * FROM ticks order by id desc")
+        self.my_cursor.execute("SELECT * FROM keywords order by kw_id desc")
         return self.my_cursor.fetchone()
 
-    def addTick(self, tick: str):
-        sql = "INSERT INTO ticks (keyword) VALUES (%s)"
-        self.my_cursor.execute(sql, [tick])
+    def addKeyword(self, keyword: str, emoji: str):
+        sql = "INSERT INTO keywords (word, emoji) VALUES (%s, %s)"
+        values = (keyword, emoji)
+        self.my_cursor.execute(sql, values)
         self.mydb.commit()
-        self.my_cursor.execute("SELECT * FROM ticks order by id desc")
+        self.my_cursor.execute("SELECT * FROM keywords order by kw_id desc")
         return self.my_cursor.fetchone()
 
-    def getTicks(self):
-        self.my_cursor.execute("SELECT * FROM ticks")
+    def getKeywords(self):
+        self.my_cursor.execute("SELECT * FROM keywords")
         ticks = self.my_cursor.fetchall()
+        self.my_cursor.execute("SELECT count(*) FROM keywords")
+        ticks_count = self.my_cursor.fetchone()
         return ticks
