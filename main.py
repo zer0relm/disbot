@@ -7,7 +7,7 @@ import sqlbot
 import random
 
 
-MY_GUILD = discord.Object(id=dotenv.dotenv_values("prod_discord.env")['GUILD_ID'])
+MY_GUILD = discord.Object(id=dotenv.dotenv_values("discord.env")['GUILD_ID'])
 
 class MyClient(discord.Client):
     # Suppress error on the User attribute being None since it fills up later
@@ -119,4 +119,4 @@ async def remove_keyword(interaction: discord.Interaction, keyword: str, user: d
 #     await interaction.response.send_message("recieved emoji '{}'".format(emoji))
 
 
-client.run(dotenv.dotenv_values("prod_discord.env")['DISCORD_TOKEN'])
+client.run(dotenv.dotenv_values("discord.env")['DISCORD_TOKEN'])

@@ -4,7 +4,7 @@ import random
 
 class sqlBot():
     def __init__(self):
-        keys = dotenv.dotenv_values("prod_db.env")
+        keys = dotenv.dotenv_values("db.env")
         self.mydb = pymysql.connect(
             host=keys["HOST"],
             user=keys["USER"],
