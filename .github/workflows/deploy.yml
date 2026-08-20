@@ -12,4 +12,4 @@ jobs:
         run: |
           cd /disbot/disbot/
           git pull origin main
-          systemctl restart disbot
+          systemctl restart disbot.service
