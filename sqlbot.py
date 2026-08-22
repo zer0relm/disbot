@@ -2,7 +2,7 @@ import pymysql
 import dotenv
 import random
 
-class sqlBot():
+class SqlBot():
     def __init__(self):
         keys = dotenv.dotenv_values("db.env")
         self.mydb = pymysql.connect(

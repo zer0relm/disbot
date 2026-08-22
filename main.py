@@ -1,7 +1,7 @@
 import dotenv
 import discord
 from discord.ext import commands
-from discord import app_commands, SelectMenu
+from discord import commands
 import sqlbot
 
 import random
@@ -22,7 +22,7 @@ class MyClient(discord.Client):
         # to store and work with them.
         # Note: When using commands.Bot instead of discord.Client, the bot will
         # maintain its own tree instead.
-        self.tree = app_commands.CommandTree(self)
+        self.tree = commands.CommandTree(self)
 
     # In this basic example, we just synchronize the app commands to one guild.
     # Instead of specifying a guild to every command, we copy over our global commands instead.
@@ -32,11 +32,12 @@ class MyClient(discord.Client):
         self.tree.copy_global_to(guild=MY_GUILD)
         await self.tree.sync(guild=MY_GUILD)
 
-sql_connector = sqlbot.sqlBot()
+sql_connector = sqlbot.SqlBot()
 
 intents = discord.Intents.default()
 intents.message_content = True
-client = MyClient(intents=intents)
+#client = MyClient(intents=intents)
+client = discord.Bot(intents=intents)
 shocked_emoji = client.get_emoji(1439750626656522390)
 keyword_list = sql_connector.getKeywords()
 
@@ -71,25 +72,25 @@ async def on_message(message):
     # elif "lizard" in message.content.lower():
     #     await message.add_reaction('\N{LIZARD}')
 
-@client.tree.command(name="quote", description="returns a random quote")
+@client.slash_command(name="quote", description="returns a random quote")
 async def quote(interaction: discord.Interaction):
     #await interaction.response.send_message(quote)
     quote = sql_connector.getRandomQuote()
     await interaction.response.send_message("Quote #{}: '{}' - {}".format(quote[0], quote[1], quote[3]))
 
-@client.tree.command(name="add_quote", description="Add quote to list")
-async def add_quote(interaction: discord.Interaction, quote: str, user: str = None):
+@client.slash_command(name="add_quote", description="Add quote to list")
+async def add_quote(interaction: discord.Interaction, quote: str, user: discord.User = None):
     if user is None:
         user = interaction.user.name
     quote_return = sql_connector.addQuote(quote, user)
     await interaction.response.send_message("Quote #{}: '{}' - {}".format(quote_return[0], quote_return[1], quote_return[3]))
 
-@client.tree.command(name="get_specific_quote", description="Returns a specific quote")
+@client.slash_command(name="get_specific_quote", description="Returns a specific quote")
 async def get_specific_quote(interaction: discord.Interaction, quote_id: str):
     quote = sql_connector.getSpecificQuote(quote_id)
     await interaction.response.send_message("Quote #{}: '{}' - {}".format(quote[0], quote[1], quote[3]))
 
-@client.tree.command(name="add_keyword", description="Add Keyword and emoji to list")
+@client.slash_command(name="add_keyword", description="Add Keyword and emoji to list")
 async def add_keyword(interaction: discord.Interaction, keyword: str, emoji: str, user: discord.User = None):
     global keyword_list
     print(str(emoji))
@@ -102,7 +103,7 @@ async def add_keyword(interaction: discord.Interaction, keyword: str, emoji: str
         keyword_list = sql_connector.getKeywords()
         await interaction.response.send_message(f"Keyword #{response[0]}: {response[1]} for {response[2]}", ephemeral=True)
 
-@client.tree.command(name="remove_keyword", description="Remove Keyword and emoji from list")
+@client.slash_command(name="remove_keyword", description="Remove Keyword and emoji from list")
 async def remove_keyword(interaction: discord.Interaction, keyword: str, user: discord.User = None):
     global keyword_list
     if user is None:
@@ -111,7 +112,7 @@ async def remove_keyword(interaction: discord.Interaction, keyword: str, user: d
         sql_connector.removeUserKeyword(keyword, user)
     await interaction.response.send_message(f"{keyword} removed", ephemeral=True)
 
-# @client.tree.command(name="test_emojis", description="Test emojis on list")
+# @client.slash_command(name="test_emojis", description="Test emojis on list")
 # async def test_emoji(interaction: discord.Interaction, emoji: str):
 #     print(emoji)
 #     print(str(emoji))
